@@ -1,0 +1,422 @@
+/* Notion-like minimal design system for Personal Finance Tracker */
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  
+  /* Notion Light Theme */
+  --bg-app: #ffffff;
+  --bg-sidebar: #fbfbfa;
+  --bg-panel: #ffffff;
+  --bg-subtle: #f7f6f3;
+  --bg-hover: rgba(55, 53, 47, 0.04);
+  --bg-active: rgba(55, 53, 47, 0.08);
+
+  --text-main: #37352f;
+  --text-muted: #787774;
+  --text-dim: #9b9a97;
+
+  --border-light: #e9e9e7;
+  --border-main: #e3e2de;
+  --border-dark: #d3d1cb;
+
+  --income: #0f7b6c;
+  --income-bg: rgba(15, 123, 108, 0.08);
+  --expense: #eb5757;
+  --expense-bg: rgba(235, 87, 87, 0.08);
+  --neutral-blue: #2383e2;
+  --neutral-blue-bg: rgba(35, 131, 226, 0.08);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(15, 15, 15, 0.05);
+  --shadow-md: 0 4px 12px rgba(15, 15, 15, 0.08);
+}
+
+[data-theme="dark"] {
+  --bg-app: #191919;
+  --bg-sidebar: #202020;
+  --bg-panel: #202020;
+  --bg-subtle: #252525;
+  --bg-hover: rgba(255, 255, 255, 0.055);
+  --bg-active: rgba(255, 255, 255, 0.095);
+
+  --text-main: rgba(255, 255, 255, 0.87);
+  --text-muted: rgba(255, 255, 255, 0.55);
+  --text-dim: rgba(255, 255, 255, 0.35);
+
+  --border-light: #2c2c2c;
+  --border-main: #373737;
+  --border-dark: #444444;
+
+  --income: #4dab9a;
+  --income-bg: rgba(77, 171, 154, 0.15);
+  --expense: #ff7575;
+  --expense-bg: rgba(255, 117, 117, 0.15);
+  --neutral-blue: #529cca;
+  --neutral-blue-bg: rgba(82, 156, 202, 0.15);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  direction: rtl;
+  text-align: right;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Base Layout */
+.app-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 32px 20px 80px 20px;
+}
+
+/* Header & Top Bar */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.brand-section h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.brand-section p {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Controls & Buttons */
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 13px;
+  color: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+}
+
+.btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-dark);
+}
+
+.btn-primary {
+  background-color: var(--text-main);
+  border-color: var(--text-main);
+  color: var(--bg-app);
+}
+
+.btn-primary:hover {
+  background-color: var(--text-muted);
+  border-color: var(--text-muted);
+}
+
+.btn-icon {
+  padding: 6px 8px;
+}
+
+/* Month Selector */
+.month-selector-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  margin-bottom: 24px;
+}
+
+.month-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Summary Grid Cards */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.summary-card {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-card .card-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.summary-card .card-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.summary-card.income .card-value {
+  color: var(--income);
+}
+
+.summary-card.expense .card-value {
+  color: var(--expense);
+}
+
+.summary-card.balance .card-value {
+  color: var(--text-main);
+}
+
+.summary-card .card-foot {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+/* Main Content Two-Column Layout */
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Panels */
+.panel {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  transition: border-color 0.15s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--neutral-blue);
+}
+
+/* Type Toggle Buttons (Income vs Expense) */
+.type-toggle-group {
+  display: flex;
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.type-toggle-btn {
+  flex: 1;
+  padding: 6px 12px;
+  background: var(--bg-subtle);
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-muted);
+  text-align: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.type-toggle-btn[data-active="true"].expense {
+  background-color: var(--expense-bg);
+  color: var(--expense);
+  font-weight: 700;
+}
+
+.type-toggle-btn[data-active="true"].income {
+  background-color: var(--income-bg);
+  color: var(--income);
+  font-weight: 700;
+}
+
+/* Transaction List Table */
+.data-table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: right;
+}
+
+.data-table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-main);
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.data-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-main);
+}
+
+.data-table tr:hover td {
+  background-color: var(--bg-hover);
+}
+
+.amount-col {
+  direction: ltr;
+  text-align: left;
+  font-weight: 700;
+}
+
+.amount-income {
+  color: var(--income);
+}
+
+.amount-expense {
+  color: var(--expense);
+}
+
+/* Badges & Chips */
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  background-color: var(--bg-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+}
+
+.tag-badge.recurring {
+  background-color: var(--neutral-blue-bg);
+  color: var(--neutral-blue);
+  border-color: rgba(35, 131, 226, 0.2);
+}
+
+/* Empty States */
+.empty-state {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 840px) {
+  .dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
