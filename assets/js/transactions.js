@@ -4,6 +4,8 @@
 
 (function () {
   let currentEditingTxId = null;
+  let currentEditingIsRecurring = false;
+  let currentEditingRuleId = null;
 
   function initTransactions() {
     setupDateDefaults();
@@ -103,16 +105,37 @@
     }
   }
 
-  function openEditModal(txId) {
-    const tx = window.StorageManager.getTransactions().find((t) => t.id === txId);
+  function openEditModal(txId, isRecurring = false, ruleId = null) {
+    let tx = null;
+    currentEditingIsRecurring = isRecurring;
+    currentEditingRuleId = ruleId;
+
+    if (isRecurring) {
+      const currentMonth = window.App ? window.App.getCurrentMonth() : "1405-08";
+      const instances = window.RecurringEngine ? window.RecurringEngine.getRecurringInstancesForMonth(currentMonth) : [];
+      tx = instances.find(i => i.id === txId);
+    } else {
+      tx = window.StorageManager.getTransactions().find((t) => t.id === txId);
+    }
+
     if (!tx) return;
 
     currentEditingTxId = tx.id;
     const modal = document.getElementById("edit-tx-modal");
     if (!modal) return;
 
+    // Notice text in modal header for recurring
+    const modalHeaderTitle = modal.querySelector(".modal-header h3");
+    if (modalHeaderTitle) {
+      modalHeaderTitle.textContent = isRecurring ? "ویرایش تراکنش دوره‌ای (استثنای این ماه)" : "ویرایش تراکنش";
+    }
+
     document.getElementById("edit-tx-amount").value = tx.amount;
-    document.getElementById("edit-tx-date").value = tx.date;
+    document.getElementById("edit-tx-date").value = tx.date || (tx.jalaliDate ? "" : "");
+    if (!document.getElementById("edit-tx-date").value) {
+      // If recurring instance, use today or month default
+      document.getElementById("edit-tx-date").value = new Date().toISOString().split("T")[0];
+    }
     document.getElementById("edit-tx-desc").value = tx.description || "";
 
     if (tx.type === "income") {
@@ -121,11 +144,14 @@
       document.getElementById("edit-tx-type-expense").checked = true;
     }
 
+    // Disable type switch for recurring instances to preserve rule integrity
+    const typeRadios = document.querySelectorAll('input[name="edit-tx-type"]');
+    typeRadios.forEach(r => r.disabled = isRecurring);
+
     // Populate category dropdown for modal
     populateEditCategorySelect(tx.type, tx.categoryId);
 
     // Watch type change in edit form
-    const typeRadios = document.querySelectorAll('input[name="edit-tx-type"]');
     typeRadios.forEach((r) => {
       r.onchange = () => {
         const selectedType = document.querySelector('input[name="edit-tx-type"]:checked')?.value || "expense";
@@ -170,6 +196,8 @@
     if (!modal) return;
     modal.classList.remove("open");
     currentEditingTxId = null;
+    currentEditingIsRecurring = false;
+    currentEditingRuleId = null;
   }
 
   function saveEditedTransaction() {
@@ -189,6 +217,25 @@
       alert("لطفاً یک دسته‌بندی انتخاب کنید.");
       return;
     }
+
+    if (currentEditingIsRecurring && currentEditingRuleId) {
+      const currentMonth = window.App ? window.App.getCurrentMonth() : "1405-08";
+      // Save as Monthly Override
+      window.StorageManager.setMonthlyOverride(currentEditingRuleId, currentMonth, {
+        status: "modified",
+        overrideData: {
+          amount,
+          categoryId,
+          description
+        }
+      });
+      closeModal();
+      if (window.App && typeof window.App.refreshDashboard === "function") {
+        window.App.refreshDashboard();
+      }
+      return;
+    }
+
     if (!date) {
       alert("لطفاً تاریخ را مشخص کنید.");
       return;
@@ -211,7 +258,29 @@
     }
   }
 
-  function deleteTransactionWithConfirm(txId) {
+  function deleteTransactionWithConfirm(txId, isRecurring = false, ruleId = null) {
+    const currentMonth = window.App ? window.App.getCurrentMonth() : "1405-08";
+
+    if (isRecurring && ruleId) {
+      const instances = window.RecurringEngine ? window.RecurringEngine.getRecurringInstancesForMonth(currentMonth) : [];
+      const tx = instances.find(i => i.id === txId);
+      const title = tx ? tx.description : "تراکنش دوره‌ای";
+      const formattedAmount = tx && window.DateUtils ? window.DateUtils.formatCurrency(tx.amount) : "";
+
+      const msg = `تراکنش «${title}» (${formattedAmount}) یک تراکنش دوره‌ای است.\n\nآیا می‌خواهید این تراکنش فقط برای ماه جاری (${currentMonth}) حذف شود؟\n(قانون پایه برای ماه‌های دیگر حفظ خواهد شد.)`;
+
+      if (!window.confirm(msg)) return;
+
+      window.StorageManager.setMonthlyOverride(ruleId, currentMonth, {
+        status: "deleted"
+      });
+
+      if (window.App && typeof window.App.refreshDashboard === "function") {
+        window.App.refreshDashboard();
+      }
+      return;
+    }
+
     const tx = window.StorageManager.getTransactions().find((t) => t.id === txId);
     if (!tx) return;
 
@@ -236,7 +305,12 @@
     if (!tbody) return;
 
     const currentMonth = monthSlug || (window.App ? window.App.getCurrentMonth() : "1405-08");
-    const transactions = window.StorageManager.getTransactionsByMonth(currentMonth);
+    const regularTxs = window.StorageManager.getTransactionsByMonth(currentMonth);
+    const recurringInstances = window.RecurringEngine
+      ? window.RecurringEngine.getRecurringInstancesForMonth(currentMonth)
+      : [];
+
+    const transactions = [...regularTxs, ...recurringInstances];
 
     if (transactions.length === 0) {
       tbody.innerHTML = `<tr><td colspan="5" class="empty-state">هنوز تراکنشی در این ماه ثبت نشده است.</td></tr>`;
@@ -256,12 +330,19 @@
             : tx.jalaliDate
           : tx.date;
 
-        const recurringBadge = tx.isRecurringInstance
-          ? `<span class="tag-badge recurring" title="تولیدشده از قانون تکرار">دوره‌ای</span>`
-          : "";
+        let recurringBadge = "";
+        if (tx.isRecurringInstance) {
+          if (tx.hasOverride) {
+            recurringBadge = `<span class="tag-badge recurring" style="background:rgba(232, 154, 60, 0.15); color:#c57a22; border-color:rgba(232, 154, 60, 0.3);" title="تراکنش دوره‌ای (ویرایش‌شده برای این ماه)">دوره‌ای (ویرایش این ماه)</span>`;
+          } else {
+            recurringBadge = `<span class="tag-badge recurring" title="تولیدشده از قانون تکرار ماهانه">دوره‌ای</span>`;
+          }
+        }
+
+        const isRec = tx.isRecurringInstance ? "true" : "false";
 
         return `
-          <tr data-id="${tx.id}">
+          <tr data-id="${tx.id}" data-is-recurring="${isRec}" data-rule-id="${tx.ruleId || ''}">
             <td style="white-space: nowrap; font-size: 12px; color: var(--text-muted);">${jalaliDateDisplay}</td>
             <td style="font-weight: 500;">
               ${escapeHtml(tx.description || "بدون شرح")}
@@ -278,8 +359,8 @@
             </td>
             <td>
               <div style="display: flex; gap: 4px;">
-                <button type="button" class="btn btn-icon edit-tx-btn" data-id="${tx.id}" title="ویرایش">ویرایش</button>
-                <button type="button" class="btn btn-icon delete-tx-btn" data-id="${tx.id}" title="حذف" style="color: var(--expense);">حذف</button>
+                <button type="button" class="btn btn-icon edit-tx-btn" data-id="${tx.id}" data-is-recurring="${isRec}" data-rule-id="${tx.ruleId || ''}" title="ویرایش">ویرایش</button>
+                <button type="button" class="btn btn-icon delete-tx-btn" data-id="${tx.id}" data-is-recurring="${isRec}" data-rule-id="${tx.ruleId || ''}" title="حذف" style="color: var(--expense);">حذف</button>
               </div>
             </td>
           </tr>
@@ -291,14 +372,18 @@
     tbody.querySelectorAll(".edit-tx-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-id");
-        openEditModal(id);
+        const isRec = btn.getAttribute("data-is-recurring") === "true";
+        const ruleId = btn.getAttribute("data-rule-id");
+        openEditModal(id, isRec, ruleId);
       });
     });
 
     tbody.querySelectorAll(".delete-tx-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-id");
-        deleteTransactionWithConfirm(id);
+        const isRec = btn.getAttribute("data-is-recurring") === "true";
+        const ruleId = btn.getAttribute("data-rule-id");
+        deleteTransactionWithConfirm(id, isRec, ruleId);
       });
     });
   }

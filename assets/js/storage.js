@@ -227,6 +227,40 @@ function saveRecurringRules(rules) {
   safeStorageSet(STORAGE_KEYS.RECURRING_RULES, rules);
 }
 
+function addRecurringRule(rule) {
+  const rules = getRecurringRules();
+  const newRule = {
+    id: generateId("rule"),
+    title: (rule.title || "تراکنش دوره‌ای").trim(),
+    amount: Math.round(Number(rule.amount) || 0),
+    type: rule.type === "income" ? "income" : "expense",
+    categoryId: rule.categoryId,
+    dayOfMonth: Math.min(31, Math.max(1, Number(rule.dayOfMonth) || 1)),
+    startMonth: rule.startMonth, // YYYY-MM
+    endMonth: rule.endMonth || null, // optional YYYY-MM
+    createdAt: new Date().toISOString()
+  };
+  rules.unshift(newRule);
+  saveRecurringRules(rules);
+  return newRule;
+}
+
+function updateRecurringRule(id, updates) {
+  const rules = getRecurringRules();
+  const idx = rules.findIndex(r => r.id === id);
+  if (idx === -1) return null;
+  rules[idx] = Object.assign({}, rules[idx], updates, { id });
+  saveRecurringRules(rules);
+  return rules[idx];
+}
+
+function deleteRecurringRule(id) {
+  const rules = getRecurringRules();
+  const filtered = rules.filter(r => r.id !== id);
+  saveRecurringRules(filtered);
+  return true;
+}
+
 // ------------------------------------------------------------- Monthly Overrides
 function getMonthlyOverrides() {
   const data = safeJsonParse(localStorage.getItem(STORAGE_KEYS.MONTHLY_OVERRIDES), []);
@@ -235,6 +269,34 @@ function getMonthlyOverrides() {
 
 function saveMonthlyOverrides(overrides) {
   safeStorageSet(STORAGE_KEYS.MONTHLY_OVERRIDES, overrides);
+}
+
+function setMonthlyOverride(ruleId, jalaliMonth, override) {
+  const overrides = getMonthlyOverrides();
+  const idx = overrides.findIndex(o => o.ruleId === ruleId && o.jalaliMonth === jalaliMonth);
+  const entry = {
+    id: idx !== -1 ? overrides[idx].id : generateId("ovr"),
+    ruleId,
+    jalaliMonth,
+    status: override.status || "modified", // 'modified' or 'deleted'
+    overrideData: override.overrideData || {},
+    updatedAt: new Date().toISOString()
+  };
+
+  if (idx !== -1) {
+    overrides[idx] = entry;
+  } else {
+    overrides.push(entry);
+  }
+  saveMonthlyOverrides(overrides);
+  return entry;
+}
+
+function removeMonthlyOverride(ruleId, jalaliMonth) {
+  const overrides = getMonthlyOverrides();
+  const filtered = overrides.filter(o => !(o.ruleId === ruleId && o.jalaliMonth === jalaliMonth));
+  saveMonthlyOverrides(filtered);
+  return true;
 }
 
 // ------------------------------------------------------------- Settings
@@ -270,8 +332,13 @@ window.StorageManager = {
   getTransactionsByMonth,
   getRecurringRules,
   saveRecurringRules,
+  addRecurringRule,
+  updateRecurringRule,
+  deleteRecurringRule,
   getMonthlyOverrides,
   saveMonthlyOverrides,
+  setMonthlyOverride,
+  removeMonthlyOverride,
   getSettings,
   saveSettings
 };

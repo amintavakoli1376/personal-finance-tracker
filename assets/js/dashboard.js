@@ -95,13 +95,18 @@
   }
 
   function calculateAndRenderSummary() {
-    const transactions = window.StorageManager.getTransactionsByMonth(activeMonthSlug);
+    const regularTxs = window.StorageManager.getTransactionsByMonth(activeMonthSlug);
+    const recurringInstances = window.RecurringEngine
+      ? window.RecurringEngine.getRecurringInstancesForMonth(activeMonthSlug)
+      : [];
+
+    const allItems = [...regularTxs, ...recurringInstances];
 
     let totalIncome = 0;
     let totalExpense = 0;
     const expenseByCat = {};
 
-    transactions.forEach((tx) => {
+    allItems.forEach((tx) => {
       const amount = Number(tx.amount) || 0;
       if (tx.type === "income") {
         totalIncome += amount;

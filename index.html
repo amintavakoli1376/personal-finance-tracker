@@ -261,6 +261,100 @@
     </div>
   </div>
 
+  <!-- Recurring Rules Management Modal -->
+  <div id="recurring-rules-modal" class="modal-backdrop">
+    <div class="modal-box" dir="rtl" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3>مدیریت قوانین تراکنش‌های دوره‌ای</h3>
+        <button id="close-recurring-rules-modal" type="button" class="modal-close-btn" title="بستن">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <p style="margin: 0; font-size: 12px; color: var(--text-muted);">
+            تراکنش‌های دوره‌ای به صورت خودکار در تمام ماه‌های مشخص‌شده محاسبه می‌شوند.
+          </p>
+          <button id="open-add-rule-btn" type="button" class="btn btn-primary" style="white-space: nowrap;">
+            + قانون جدید
+          </button>
+        </div>
+
+        <div id="recurring-rules-list" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Populated via recurring.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Recurring Rule Modal -->
+  <div id="add-rule-modal" class="modal-backdrop">
+    <div class="modal-box" dir="rtl">
+      <div class="modal-header">
+        <h3>تعریف قانون تراکنش دوره‌ای جدید</h3>
+        <button id="close-add-rule-modal" type="button" class="modal-close-btn" title="بستن">✕</button>
+      </div>
+
+      <form id="add-rule-form" class="modal-body">
+        <!-- Type Selection -->
+        <div class="form-group">
+          <label style="font-size: 12px; color: var(--text-muted);">نوع تراکنش</label>
+          <div style="display: flex; gap: 14px; margin-top: 4px;">
+            <label style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="radio" id="rule-type-expense" name="rule-type" value="expense" checked> هزینه ماهانه
+            </label>
+            <label style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="radio" id="rule-type-income" name="rule-type" value="income"> درآمد ماهانه
+            </label>
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="form-group">
+          <label for="rule-title">عنوان قانون (مثال: اجاره منزل، اشتراک اینترنت)</label>
+          <input type="text" id="rule-title" class="form-control" required placeholder="عنوان تراکنش">
+        </div>
+
+        <!-- Amount -->
+        <div class="form-group">
+          <label for="rule-amount">مبلغ ماهانه (تومان)</label>
+          <input type="number" id="rule-amount" class="form-control" required min="1" placeholder="مثال: ۱۰,۰۰۰,۰۰۰">
+        </div>
+
+        <!-- Category -->
+        <div class="form-group">
+          <label for="rule-category">دسته‌بندی</label>
+          <select id="rule-category" class="form-control" required>
+            <option value="">انتخاب دسته‌بندی…</option>
+          </select>
+        </div>
+
+        <!-- Day of Month -->
+        <div class="form-group">
+          <label for="rule-day">روز اجرای ماه (شمسی)</label>
+          <input type="number" id="rule-day" class="form-control" min="1" max="31" value="1" required>
+        </div>
+
+        <!-- Month Range -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label for="rule-start-month">ماه شروع</label>
+            <select id="rule-start-month" class="form-control" required></select>
+          </div>
+
+          <div class="form-group">
+            <label for="rule-end-month">ماه پایان (اختیاری)</label>
+            <select id="rule-end-month" class="form-control"></select>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">ذخیره قانون تکرار</button>
+          <button type="button" id="cancel-add-rule-btn" class="btn">انصراف</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Scripts & Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.7/dist/jalaali.min.js"></script>
   <script>window.jalaali || document.write('<script src="assets/vendor/jalaali.min.js"><\/script>')</script>
@@ -270,6 +364,7 @@
 
   <script src="assets/js/date-utils.js"></script>
   <script src="assets/js/storage.js"></script>
+  <script src="assets/js/recurring.js"></script>
   <script src="assets/js/categories.js"></script>
   <script src="assets/js/transactions.js"></script>
   <script src="assets/js/charts.js"></script>
