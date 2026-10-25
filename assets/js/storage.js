@@ -137,6 +137,86 @@ function saveTransactions(transactions) {
   safeStorageSet(STORAGE_KEYS.TRANSACTIONS, transactions);
 }
 
+function addTransaction(tx) {
+  const transactions = getTransactions();
+  const d = tx.date ? new Date(tx.date) : new Date();
+  
+  let jalaliDate = tx.jalaliDate;
+  let jalaliMonth = tx.jalaliMonth;
+  if (!jalaliDate || !jalaliMonth) {
+    if (window.DateUtils) {
+      const j = window.DateUtils.toJalaliDate(d);
+      jalaliDate = `${j.jy}-${String(j.jm).padStart(2, "0")}-${String(j.jd).padStart(2, "0")}`;
+      jalaliMonth = window.DateUtils.getJalaliMonthSlug(j.jy, j.jm);
+    } else {
+      jalaliDate = tx.date;
+      jalaliMonth = tx.date.substring(0, 7);
+    }
+  }
+
+  const newTx = {
+    id: generateId("tx"),
+    amount: Math.round(Number(tx.amount) || 0),
+    type: tx.type === "income" ? "income" : "expense",
+    categoryId: tx.categoryId,
+    date: tx.date || d.toISOString().split("T")[0],
+    jalaliDate: jalaliDate,
+    jalaliMonth: jalaliMonth,
+    description: (tx.description || "").trim(),
+    isRecurringInstance: Boolean(tx.isRecurringInstance),
+    ruleId: tx.ruleId || null,
+    createdAt: new Date().toISOString()
+  };
+
+  transactions.unshift(newTx); // Newest first
+  saveTransactions(transactions);
+  return newTx;
+}
+
+function updateTransaction(id, updates) {
+  const transactions = getTransactions();
+  const idx = transactions.findIndex(t => t.id === id);
+  if (idx === -1) return null;
+
+  const current = transactions[idx];
+  let date = updates.date || current.date;
+  let jalaliDate = current.jalaliDate;
+  let jalaliMonth = current.jalaliMonth;
+
+  if (updates.date && updates.date !== current.date) {
+    if (window.DateUtils) {
+      const j = window.DateUtils.toJalaliDate(new Date(updates.date));
+      jalaliDate = `${j.jy}-${String(j.jm).padStart(2, "0")}-${String(j.jd).padStart(2, "0")}`;
+      jalaliMonth = window.DateUtils.getJalaliMonthSlug(j.jy, j.jm);
+    }
+  }
+
+  const updatedTx = Object.assign({}, current, updates, {
+    id, // Protect ID
+    amount: updates.amount !== undefined ? Math.round(Number(updates.amount) || 0) : current.amount,
+    date,
+    jalaliDate,
+    jalaliMonth,
+    description: updates.description !== undefined ? updates.description.trim() : current.description
+  });
+
+  transactions[idx] = updatedTx;
+  saveTransactions(transactions);
+  return updatedTx;
+}
+
+function deleteTransaction(id) {
+  const transactions = getTransactions();
+  const filtered = transactions.filter(t => t.id !== id);
+  saveTransactions(filtered);
+  return true;
+}
+
+function getTransactionsByMonth(jalaliMonth) {
+  const transactions = getTransactions();
+  return transactions.filter(t => t.jalaliMonth === jalaliMonth);
+}
+
 // ------------------------------------------------------------- Recurring Rules
 function getRecurringRules() {
   const data = safeJsonParse(localStorage.getItem(STORAGE_KEYS.RECURRING_RULES), []);
@@ -184,6 +264,10 @@ window.StorageManager = {
   getCategoryById,
   getTransactions,
   saveTransactions,
+  addTransaction,
+  updateTransaction,
+  deleteTransaction,
+  getTransactionsByMonth,
   getRecurringRules,
   saveRecurringRules,
   getMonthlyOverrides,
