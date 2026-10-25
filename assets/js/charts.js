@@ -78,6 +78,9 @@ function renderCategoryChart(data = []) {
       responsive: true,
       maintainAspectRatio: false,
       cutout: "68%",
+      animation: {
+        duration: 400
+      },
       plugins: {
         legend: {
           position: "bottom",
@@ -112,6 +115,21 @@ function renderCategoryChart(data = []) {
       }
     }
   });
+}
+
+// Watch theme changes to update chart border color
+if (typeof MutationObserver !== "undefined") {
+  const observer = new MutationObserver(() => {
+    if (categoryChartInstance) {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      categoryChartInstance.data.datasets[0].borderColor = isDark ? "#202020" : "#ffffff";
+      if (categoryChartInstance.options.plugins?.legend?.labels) {
+        categoryChartInstance.options.plugins.legend.labels.color = isDark ? "rgba(255,255,255,0.7)" : "#787774";
+      }
+      categoryChartInstance.update();
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 }
 
 window.ChartManager = {

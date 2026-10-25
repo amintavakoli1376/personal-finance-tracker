@@ -129,6 +129,61 @@ function getJalaliMonthLength(jy, jm) {
   return 29;
 }
 
+/**
+ * Returns adjacent Jalali month slug with given offset (-1 or +1)
+ * @param {string} slug "YYYY-MM"
+ * @param {number} offset 
+ * @returns {string}
+ */
+function getAdjacentMonth(slug, offset = -1) {
+  const { jy, jm } = parseJalaliMonthSlug(slug);
+  let newY = jy;
+  let newM = jm + offset;
+
+  while (newM < 1) {
+    newM += 12;
+    newY -= 1;
+  }
+  while (newM > 12) {
+    newM -= 12;
+    newY += 1;
+  }
+
+  return getJalaliMonthSlug(newY, newM);
+}
+
+/**
+ * Returns current Jalali month slug according to today
+ * @returns {string}
+ */
+function getCurrentJalaliMonthSlug() {
+  const j = toJalaliDate(new Date());
+  return getJalaliMonthSlug(j.jy, j.jm);
+}
+
+/**
+ * Generates an array of Jalali month options { slug, label }
+ * @param {number} pastYears 
+ * @param {number} futureYears 
+ * @returns {Array<{ slug: string, label: string }>}
+ */
+function generateMonthOptions(pastYears = 2, futureYears = 1) {
+  const current = toJalaliDate(new Date());
+  const startYear = current.jy - pastYears;
+  const endYear = current.jy + futureYears;
+  const options = [];
+
+  for (let y = endYear; y >= startYear; y--) {
+    for (let m = 12; m >= 1; m--) {
+      const slug = getJalaliMonthSlug(y, m);
+      const label = formatJalaliMonth(y, m);
+      options.push({ slug, label });
+    }
+  }
+
+  return options;
+}
+
 // Global export for non-module HTML inclusion
 window.DateUtils = {
   JALALI_MONTH_NAMES,
@@ -139,5 +194,8 @@ window.DateUtils = {
   formatJalaliMonth,
   getJalaliMonthSlug,
   parseJalaliMonthSlug,
-  getJalaliMonthLength
+  getJalaliMonthLength,
+  getAdjacentMonth,
+  getCurrentJalaliMonthSlug,
+  generateMonthOptions
 };
