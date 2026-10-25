@@ -81,6 +81,52 @@ function saveCategories(categories) {
   safeStorageSet(STORAGE_KEYS.CATEGORIES, categories);
 }
 
+function addCategory(cat) {
+  const categories = getCategories();
+  const newCat = {
+    id: generateId("cat"),
+    name: cat.name.trim(),
+    type: cat.type || "expense",
+    color: cat.color || "#787774",
+    icon: cat.icon || "tag",
+    isDefault: false
+  };
+  categories.push(newCat);
+  saveCategories(categories);
+  return newCat;
+}
+
+function updateCategory(id, updates) {
+  const categories = getCategories();
+  const idx = categories.findIndex(c => c.id === id);
+  if (idx === -1) return null;
+  categories[idx] = Object.assign({}, categories[idx], updates, { id }); // Protect id
+  saveCategories(categories);
+  return categories[idx];
+}
+
+function deleteCategory(id) {
+  const categories = getCategories();
+  const filtered = categories.filter(c => c.id !== id);
+  saveCategories(filtered);
+  return true;
+}
+
+function getCategoryById(id) {
+  const categories = getCategories();
+  const found = categories.find(c => c.id === id);
+  if (found) return found;
+
+  // Fallback for deleted category
+  return {
+    id: id,
+    name: "دسته‌بندی حذف‌شده",
+    color: "#9b9a97",
+    type: "expense",
+    isDeleted: true
+  };
+}
+
 // ------------------------------------------------------------- Transactions
 function getTransactions() {
   const data = safeJsonParse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS), []);
@@ -132,6 +178,10 @@ window.StorageManager = {
   generateId,
   getCategories,
   saveCategories,
+  addCategory,
+  updateCategory,
+  deleteCategory,
+  getCategoryById,
   getTransactions,
   saveTransactions,
   getRecurringRules,

@@ -147,6 +147,64 @@
     </div>
   </div>
 
+  <!-- Categories Management Modal -->
+  <div id="categories-modal" class="modal-backdrop">
+    <div class="modal-box" dir="rtl">
+      <div class="modal-header">
+        <h3>مدیریت دسته‌بندی‌ها</h3>
+        <button id="close-categories-modal" type="button" class="modal-close-btn" title="بستن">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Add / Edit Category Form -->
+        <form id="category-edit-form" class="panel" style="background-color: var(--bg-subtle); padding: 14px; border-radius: var(--radius-sm); margin: 0;">
+          <h4 id="cat-form-title" style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700;">افزودن دسته‌بندی جدید</h4>
+          
+          <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 140px;">
+              <label for="cat-name-input" style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">نام دسته‌بندی</label>
+              <input type="text" id="cat-name-input" class="form-control" placeholder="مثال: بیمه، بنزین..." required>
+            </div>
+
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">نوع</label>
+              <div style="display: flex; gap: 8px; align-items: center; height: 34px;">
+                <label style="font-size: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                  <input type="radio" id="cat-type-expense" name="cat-type" value="expense" checked> هزینه
+                </label>
+                <label style="font-size: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                  <input type="radio" id="cat-type-income" name="cat-type" value="income"> درآمد
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 10px;">
+            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">انتخاب رنگ شاخص</label>
+            <div id="color-swatches-container" class="color-picker-grid"></div>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button id="submit-cat-btn" type="submit" class="btn btn-primary" style="flex: 1;">افزودن دسته</button>
+            <button id="cancel-cat-edit-btn" type="button" class="btn" style="display: none;">انصراف</button>
+          </div>
+        </form>
+
+        <!-- Categories List Tabs -->
+        <div>
+          <div class="seg" role="tablist" style="margin-bottom: 12px; width: 100%;">
+            <button id="cat-tab-expense" type="button" data-active="true" style="flex: 1;">دسته‌های هزینه</button>
+            <button id="cat-tab-income" type="button" data-active="false" style="flex: 1;">دسته‌های درآمد</button>
+          </div>
+
+          <div id="categories-list-container">
+            <!-- Populated via categories.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts & Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.7/dist/jalaali.min.js"></script>
   <script>window.jalaali || document.write('<script src="assets/vendor/jalaali.min.js"><\/script>')</script>
@@ -156,6 +214,7 @@
 
   <script src="assets/js/date-utils.js"></script>
   <script src="assets/js/storage.js"></script>
+  <script src="assets/js/categories.js"></script>
   <script src="assets/js/charts.js"></script>
   <script src="assets/js/app.js"></script>
   <!-- Fallback alias -->
