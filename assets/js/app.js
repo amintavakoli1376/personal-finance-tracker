@@ -20,8 +20,81 @@ document.addEventListener("DOMContentLoaded", () => {
     themeToggleBtn.textContent = savedTheme === "dark" ? "حالت روشن" : "حالت تاریک";
   }
 
+  // Setup Mobile Bottom Navigation & Routing
+  setupMobileNavigation();
+
   console.log("Personal Finance Tracker initialized successfully.");
 });
+
+function setupMobileNavigation() {
+  const navButtons = document.querySelectorAll(".nav-tab-btn");
+  const dashboardView = document.getElementById("view-dashboard");
+  const transactionsView = document.getElementById("view-transactions");
+  const fabBtn = document.getElementById("mobile-add-fab");
+
+  function switchTab(target) {
+    navButtons.forEach(btn => {
+      btn.setAttribute("data-active", btn.getAttribute("data-target") === target ? "true" : "false");
+    });
+
+    if (window.innerWidth < 768) {
+      if (target === "dashboard") {
+        if (dashboardView) dashboardView.classList.add("active");
+        if (transactionsView) transactionsView.classList.remove("active");
+      } else if (target === "transactions") {
+        if (dashboardView) dashboardView.classList.remove("active");
+        if (transactionsView) transactionsView.classList.add("active");
+      } else if (target === "categories") {
+        if (window.CategoriesManager && typeof window.CategoriesManager.openModal === "function") {
+          window.CategoriesManager.openModal();
+        }
+      } else if (target === "recurring") {
+        if (window.RecurringEngine && typeof window.RecurringEngine.openManageModal === "function") {
+          window.RecurringEngine.openManageModal();
+        }
+      }
+    }
+  }
+
+  navButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.getAttribute("data-target");
+      window.location.hash = target;
+      switchTab(target);
+    });
+  });
+
+  // FAB button scrolls to quick-add or opens form
+  if (fabBtn) {
+    fabBtn.addEventListener("click", () => {
+      if (window.innerWidth < 768) {
+        // Switch to dashboard and scroll to quick add
+        switchTab("dashboard");
+        window.location.hash = "dashboard";
+      }
+      const quickAdd = document.getElementById("quick-add-panel");
+      if (quickAdd) {
+        quickAdd.scrollIntoView({ behavior: "smooth" });
+        const amountInput = document.getElementById("tx-amount");
+        if (amountInput) amountInput.focus();
+      }
+    });
+  }
+
+  // Handle initial hash or window resize
+  const initialTab = (window.location.hash || "").replace("#", "") || "dashboard";
+  switchTab(initialTab);
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 768) {
+      if (dashboardView) dashboardView.classList.add("active");
+      if (transactionsView) transactionsView.classList.add("active");
+    } else {
+      const curTab = (window.location.hash || "").replace("#", "") || "dashboard";
+      switchTab(curTab);
+    }
+  });
+}
 
 // Global App Orchestrator
 window.App = {

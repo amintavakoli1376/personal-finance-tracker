@@ -60,7 +60,7 @@
     <!-- Dashboard Main Body (2 Columns) -->
     <div class="dashboard-columns">
       <!-- Left Column: Chart & Quick Forms -->
-      <aside style="display: flex; flex-direction: column; gap: 20px;">
+      <aside id="view-dashboard" class="view-tab-content active" style="display: flex; flex-direction: column; gap: 16px;">
         <!-- Category Breakdown Chart Panel -->
         <div class="panel">
           <div class="panel-header">
@@ -73,7 +73,7 @@
         </div>
 
         <!-- Add Transaction Form Panel -->
-        <div class="panel">
+        <div id="quick-add-panel" class="panel">
           <div class="panel-header">
             <h2>ثبت تراکنش جدید</h2>
           </div>
@@ -116,7 +116,7 @@
       </aside>
 
       <!-- Right Column: Transactions Feed Table -->
-      <main class="panel" style="min-height: 520px;">
+      <main id="view-transactions" class="panel view-tab-content" style="min-height: 480px;">
         <div class="panel-header">
           <h2>ریز تراکنش‌های ماه</h2>
           <div style="display: flex; gap: 8px;">
@@ -125,23 +125,8 @@
           </div>
         </div>
 
-        <div class="data-table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>تاریخ شمسی</th>
-                <th>عنوان</th>
-                <th>دسته‌بندی</th>
-                <th style="text-align: left;">مبلغ (تومان)</th>
-                <th>عملیات</th>
-              </tr>
-            </thead>
-            <tbody id="transactions-table-body">
-              <tr>
-                <td colspan="5" class="empty-state">هنوز تراکنشی در این ماه ثبت نشده است.</td>
-              </tr>
-            </tbody>
-          </table>
+        <div id="transactions-table-body" class="tx-list-container">
+          <div class="empty-state">هنوز تراکنشی در این ماه ثبت نشده است.</div>
         </div>
       </main>
     </div>
@@ -150,6 +135,7 @@
   <!-- Categories Management Modal -->
   <div id="categories-modal" class="modal-backdrop">
     <div class="modal-box" dir="rtl">
+      <div class="sheet-drag-handle"></div>
       <div class="modal-header">
         <h3>مدیریت دسته‌بندی‌ها</h3>
         <button id="close-categories-modal" type="button" class="modal-close-btn" title="بستن">✕</button>
@@ -208,6 +194,7 @@
   <!-- Edit Transaction Modal -->
   <div id="edit-tx-modal" class="modal-backdrop">
     <div class="modal-box" dir="rtl">
+      <div class="sheet-drag-handle"></div>
       <div class="modal-header">
         <h3>ویرایش تراکنش</h3>
         <button id="close-edit-tx-modal" type="button" class="modal-close-btn" title="بستن">✕</button>
@@ -264,6 +251,7 @@
   <!-- Recurring Rules Management Modal -->
   <div id="recurring-rules-modal" class="modal-backdrop">
     <div class="modal-box" dir="rtl" style="max-width: 620px;">
+      <div class="sheet-drag-handle"></div>
       <div class="modal-header">
         <h3>مدیریت قوانین تراکنش‌های دوره‌ای</h3>
         <button id="close-recurring-rules-modal" type="button" class="modal-close-btn" title="بستن">✕</button>
@@ -289,6 +277,7 @@
   <!-- Add Recurring Rule Modal -->
   <div id="add-rule-modal" class="modal-backdrop">
     <div class="modal-box" dir="rtl">
+      <div class="sheet-drag-handle"></div>
       <div class="modal-header">
         <h3>تعریف قانون تراکنش دوره‌ای جدید</h3>
         <button id="close-add-rule-modal" type="button" class="modal-close-btn" title="بستن">✕</button>
@@ -354,6 +343,56 @@
       </form>
     </div>
   </div>
+
+  <!-- Mobile Floating Action Button (FAB) -->
+  <button id="mobile-add-fab" class="mobile-fab-btn" type="button" title="ثبت تراکنش سریع">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </button>
+
+  <!-- Mobile Bottom Sticky Navigation Bar -->
+  <nav class="bottom-nav-bar">
+    <button type="button" class="nav-tab-btn" data-target="dashboard" data-active="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="9"></rect>
+        <rect x="14" y="3" width="7" height="5"></rect>
+        <rect x="14" y="12" width="7" height="9"></rect>
+        <rect x="3" y="16" width="7" height="5"></rect>
+      </svg>
+      <span>داشبورد</span>
+    </button>
+
+    <button type="button" class="nav-tab-btn" data-target="transactions" data-active="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      </svg>
+      <span>تراکنش‌ها</span>
+    </button>
+
+    <button type="button" class="nav-tab-btn" data-target="categories" data-active="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+      </svg>
+      <span>دسته‌ها</span>
+    </button>
+
+    <button type="button" class="nav-tab-btn" data-target="recurring" data-active="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <polyline points="1 20 1 14 7 14"></polyline>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+      <span>دوره‌ای</span>
+    </button>
+  </nav>
 
   <!-- Scripts & Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.7/dist/jalaali.min.js"></script>

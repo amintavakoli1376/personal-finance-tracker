@@ -313,7 +313,7 @@
     const transactions = [...regularTxs, ...recurringInstances];
 
     if (transactions.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" class="empty-state">هنوز تراکنشی در این ماه ثبت نشده است.</td></tr>`;
+      tbody.innerHTML = `<div class="empty-state">هنوز تراکنشی در این ماه ثبت نشده است.</div>`;
       return;
     }
 
@@ -342,28 +342,32 @@
         const isRec = tx.isRecurringInstance ? "true" : "false";
 
         return `
-          <tr data-id="${tx.id}" data-is-recurring="${isRec}" data-rule-id="${tx.ruleId || ''}">
-            <td style="white-space: nowrap; font-size: 12px; color: var(--text-muted);">${jalaliDateDisplay}</td>
-            <td style="font-weight: 500;">
-              ${escapeHtml(tx.description || "بدون شرح")}
-              ${recurringBadge}
-            </td>
-            <td>
-              <span class="category-badge-pill" style="font-size: 12px;">
-                <span class="color-dot" style="background-color: ${cat.color};"></span>
-                <span>${escapeHtml(cat.name)}</span>
-              </span>
-            </td>
-            <td class="amount-col ${amountClass}">
-              ${sign}${formattedAmount}
-            </td>
-            <td>
-              <div style="display: flex; gap: 4px;">
+          <div class="tx-card-item" data-id="${tx.id}" data-is-recurring="${isRec}" data-rule-id="${tx.ruleId || ''}">
+            <div class="tx-card-main">
+              <div class="tx-color-indicator" style="background-color: ${cat.color};"></div>
+              <div class="tx-meta">
+                <div class="tx-title">
+                  <span>${escapeHtml(tx.description || "بدون شرح")}</span>
+                  ${recurringBadge}
+                </div>
+                <div class="tx-sub">
+                  <span>${jalaliDateDisplay}</span>
+                  <span>•</span>
+                  <span style="color: ${cat.color};">${escapeHtml(cat.name)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tx-card-right">
+              <div class="tx-card-amount ${amountClass}">
+                ${sign}${formattedAmount}
+              </div>
+              <div class="tx-card-actions">
                 <button type="button" class="btn btn-icon edit-tx-btn" data-id="${tx.id}" data-is-recurring="${isRec}" data-rule-id="${tx.ruleId || ''}" title="ویرایش">ویرایش</button>
                 <button type="button" class="btn btn-icon delete-tx-btn" data-id="${tx.id}" data-is-recurring="${isRec}" data-rule-id="${tx.ruleId || ''}" title="حذف" style="color: var(--expense);">حذف</button>
               </div>
-            </td>
-          </tr>
+            </div>
+          </div>
         `;
       })
       .join("");
